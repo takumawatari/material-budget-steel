@@ -4,4 +4,4 @@ This repository contains system models and datasets exploring future steel flows
 
 The details and results of this model are published as the following journal article:
 
-Takuma Watari, Sho Hata, Kenichi Nakajima, and Keisuke Nansai () Limited quantity and quality of steel supply in a zero-emission future, doi
+Watari, T., Hata, S., Nakajima, K., and nansai, K. () Limited quantity and quality of steel supply in a zero-emission future, doi
