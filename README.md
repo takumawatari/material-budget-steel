@@ -1,6 +1,6 @@
 # steel_cycle_jp
 
-This repository contains system models and datasets exploring future steel flow consistent with a carbon budget.
+This repository contains system models and datasets exploring future steel flows consistent with a carbon budget.
 
 The details and results of this model are published as the following journal article:
 
