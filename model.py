@@ -8,7 +8,7 @@ from ortoolpy import model_min, addvars, addvals
 
 def material_budget_model(sheet_name):
     
-    Data = pd.read_excel (io = r'data_inputs.xlsx', sheet_name = sheet_name,nrows=101)
+    Data = pd.read_excel (io = r'data_inputs.xlsx', sheet_name = sheet_name, nrows=101)
     matrix_long  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name="matrix_long")
     matrix_flat  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name="matrix_flat")
     matrix_tube  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name="matrix_tube")
