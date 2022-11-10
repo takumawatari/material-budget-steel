@@ -3,14 +3,14 @@ import numpy as np
 from scipy import stats
 from scipy.stats import norm
 from scipy.stats import weibull_min
-from pulp import LpProblem,LpVariable, LpMinimize,LpMaximize, LpContinuous, lpSum, lpDot, value
+from pulp import LpProblem, LpVariable, LpMinimize, LpMaximize, LpContinuous, lpSum, lpDot, value
 from ortoolpy import model_min, addvars, addvals
 import matplotlib.pyplot as plt
 
 def material_budget_model(sheet_name):
     
     # data import
-    Data = pd.read_excel (io = r'data_inputs.xlsx', sheet_name = sheet_name,nrows=101)
+    Data = pd.read_excel (io = r'data_inputs.xlsx', sheet_name = sheet_name, nrows=101)
     matrix_long  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name="matrix_long")
     matrix_flat  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name="matrix_flat")
     matrix_tube  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name="matrix_tube")
