@@ -1,4 +1,4 @@
-# steel_cycle_jp
+# Steel flows in a zero-emission future
 
 This repository contains system models and datasets to explore future steel flows consistent with a carbon budget.
 
