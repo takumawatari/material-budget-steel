@@ -4,4 +4,4 @@ This repository contains system models and datasets to explore future steel flow
 
 The details and results of this model are published as the following journal article:
 
->Watari, T. et al. () Limited quantity and quality of steel supply in a zero-emission future, doi
+>Watari, T. et al. () Limited quantity and quality of steel supply in a zero-emission future, Nature Sustainability
