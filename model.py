@@ -7,6 +7,7 @@ from pulp import LpProblem, LpVariable, LpMinimize, LpMaximize, LpContinuous, lp
 from ortoolpy import model_min, addvars, addvals
 import matplotlib.pyplot as plt
 
+# functions
 def compute_export(production, share):
     export = production * share
     return export
@@ -43,9 +44,9 @@ def compute_outflow(inflow, shape, scale):
 # material budget model
 def material_budget_model(sheet_name):
     Data = pd.read_excel (io = r'data_inputs.xlsx', sheet_name = sheet_name, nrows=101)
-    matrix_long = pd.read_excel (io = r'data_inputs.xlsx', sheet_name='matrix_long')
-    matrix_flat = pd.read_excel (io = r'data_inputs.xlsx', sheet_name='matrix_flat')
-    matrix_tube = pd.read_excel (io = r'data_inputs.xlsx', sheet_name='matrix_tube')
+    matrix_long  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name='matrix_long')
+    matrix_flat  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name='matrix_flat')
+    matrix_tube  = pd.read_excel (io = r'data_inputs.xlsx', sheet_name='matrix_tube')
     matrix_alloy = pd.read_excel (io = r'data_inputs.xlsx', sheet_name='matrix_alloy')
     
     # system variables
@@ -63,87 +64,116 @@ def material_budget_model(sheet_name):
     forming_sec = compute_scrap(Data.Var_sec, export_sec, Data.forming_yield_sec)
     forming_hyd = compute_scrap(Data.Var_hyd, export_hyd, Data.forming_yield_pri)
     
-    # domestic production of finished steel
+    # domestic use of crude steel
     use_pri = compute_domestic_use(Data.Var_pri, export_pri, forming_pri)
     use_sec = compute_domestic_use(Data.Var_sec, export_sec, forming_sec)
     use_hyd = compute_domestic_use(Data.Var_hyd, export_hyd, forming_hyd)
     
-    pro_long = compute_semi(use_pri, use_sec, use_hyd, Data.share_long_pri, Data.share_long_sec)
-    pro_flat = compute_semi(use_pri, use_sec, use_hyd, Data.share_flat_pri, Data.share_flat_sec)
-    pro_tube = compute_semi(use_pri, use_sec, use_hyd, Data.share_tube_pri, Data.share_tube_sec)
-    pro_alloy = compute_semi(use_pri, use_sec, use_hyd, Data.share_alloy_pri, Data.share_alloy_sec)
+    # data preparation
+    semi_name= ['long', 'flat', 'tube', 'alloy']
     
-    # net-exports of finished steel
-    export_long = compute_export(pro_long, Data.share_export_long)
-    export_flat = compute_export(pro_flat, Data.share_export_flat)
-    export_tube = compute_export(pro_tube, Data.share_export_tube)
-    export_alloy = compute_export(pro_alloy, Data.share_export_alloy)
+    share_pri = pd.DataFrame({'long': Data.share_long_pri,
+                             'flat': Data.share_flat_pri,
+                             'tube': Data.share_tube_pri,
+                             'alloy': Data.share_alloy_pri,},)
     
-    # fabrication yield
-    fabrication_long = compute_scrap(pro_long, export_long, Data.fabrication_yield_long)
-    fabrication_flat = compute_scrap(pro_flat, export_flat, Data.fabrication_yield_flat)
-    fabrication_tube = compute_scrap(pro_tube, export_tube, Data.fabrication_yield_tube)
-    fabrication_alloy = compute_scrap(pro_alloy, export_alloy, Data.fabrication_yield_alloy)
-    
-    # domestic production of end-use goods
-    use_long = compute_domestic_use(pro_long, export_long, fabrication_long)
-    use_flat = compute_domestic_use(pro_flat, export_flat, fabrication_flat)
-    use_tube = compute_domestic_use(pro_tube, export_tube, fabrication_tube)
-    use_alloy = compute_domestic_use(pro_alloy, export_alloy, fabrication_alloy)
-    
-    pro_BU = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.BU, matrix_flat.BU, matrix_tube.BU, matrix_alloy.BU)
-    pro_IF = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.IF, matrix_flat.IF, matrix_tube.IF, matrix_alloy.IF)
-    pro_MM = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.MM, matrix_flat.MM, matrix_tube.MM, matrix_alloy.MM)
-    pro_EE = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.EE, matrix_flat.EE, matrix_tube.EE, matrix_alloy.EE)
-    pro_AU = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.AU, matrix_flat.AU, matrix_tube.AU, matrix_alloy.AU)
-    pro_OT = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.OT, matrix_flat.OT, matrix_tube.OT, matrix_alloy.OT)
-    pro_MP = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.MP, matrix_flat.MP, matrix_tube.MP, matrix_alloy.MP)
+    share_sec = pd.DataFrame({'long': Data.share_long_sec,
+                             'flat': Data.share_flat_sec,
+                             'tube': Data.share_tube_sec,
+                             'alloy': Data.share_alloy_sec,},)
 
-    # inflow
-    in_BU = pro_BU - compute_export(pro_BU, Data.share_export_BU)
-    in_IF = pro_IF - compute_export(pro_IF, Data.share_export_IF)
-    in_MM = pro_MM - compute_export(pro_MM, Data.share_export_MM)
-    in_EE = pro_EE - compute_export(pro_EE, Data.share_export_EE)
-    in_AU = pro_AU - compute_export(pro_AU, Data.share_export_AU)
-    in_OT = pro_OT - compute_export(pro_OT, Data.share_export_OT)
-    in_MP = pro_MP - compute_export(pro_MP, Data.share_export_MP)
-
-    # outflow
-    ot_BU = compute_outflow(in_BU, Data.shape_BU, Data.scale_BU)
-    ot_IF = compute_outflow(in_IF, Data.shape_IF, Data.scale_IF)
-    ot_MM = compute_outflow(in_MM, Data.shape_MM, Data.scale_MM)
-    ot_EE = compute_outflow(in_EE, Data.shape_EE, Data.scale_EE)
-    ot_AU = compute_outflow(in_AU, Data.shape_AU, Data.scale_AU)
-    ot_OT = compute_outflow(in_OT, Data.shape_OT, Data.scale_OT)
-    ot_MP = compute_outflow(in_MP, Data.shape_MP, Data.scale_MP)
+    exp_share_semi = pd.DataFrame({'long': Data.share_export_long,
+                                   'flat': Data.share_export_flat,
+                                   'tube': Data.share_export_tube,
+                                   'alloy': Data.share_export_alloy,},)
+    
+    fabrication_yield = pd.DataFrame({'long': Data.fabrication_yield_long,
+                                      'flat': Data.fabrication_yield_flat,
+                                      'tube': Data.fabrication_yield_tube,
+                                      'alloy': Data.fabrication_yield_alloy,},)
+    
+    pro_semi = pd.DataFrame()
+    exp_semi = pd.DataFrame()
+    fabrication = pd.DataFrame()
+    use_semi = pd.DataFrame()
+    
+    for m in semi_name:
         
-    # end-of-life scrap
-    EOL_BU = ot_BU * (1 - Data.hiber_BU)
-    EOL_IF = ot_IF * (1 - Data.hiber_IF)
-    EOL_MM = ot_MM * (1 - Data.hiber_MM)
-    EOL_EE = ot_EE * (1 - Data.hiber_EE)
-    EOL_AU = ot_AU * (1 - Data.hiber_AU)
-    EOL_OT = ot_OT * (1 - Data.hiber_OT)
-    EOL_MP = ot_MP * (1 - Data.hiber_MP)
+        # domestic production of finished steel
+        pro_semi_list = compute_semi(use_pri, use_sec, use_hyd, share_pri[m], share_sec[m])
+        pro_semi[m] = pro_semi_list
+        
+        # net-exports of finished steel
+        exp_semi_list = compute_export(pro_semi[m], exp_share_semi[m])
+        exp_semi[m] = exp_semi_list
+        
+        # fabrication yield
+        fabrication_list = compute_scrap(pro_semi[m], exp_semi[m], fabrication_yield[m])
+        fabrication[m] = fabrication_list
+        
+        # domestic use of finished steel
+        use_semi_list = compute_domestic_use(pro_semi[m], exp_semi[m], fabrication[m])
+        use_semi[m] = use_semi_list
+    
+    # data preparation
+    product_name = ['BU', 'IF', 'MM', 'EE', 'AU', 'OT', 'MP']
+    
+    exp_share_end = pd.DataFrame({'BU': Data.share_export_BU, 'IF': Data.share_export_IF, 
+                                'MM': Data.share_export_MM, 'EE': Data.share_export_EE, 
+                                'AU': Data.share_export_AU, 'OT': Data.share_export_OT, 
+                                'MP': Data.share_export_MP,},)
+    
+    shape_list = pd.DataFrame({'BU': Data.shape_BU, 'IF': Data.shape_IF, 
+                               'MM': Data.shape_MM, 'EE': Data.shape_EE, 
+                               'AU': Data.shape_AU, 'OT': Data.shape_OT, 
+                               'MP': Data.shape_MP,},)
+        
+    scale_list = pd.DataFrame({'BU': Data.scale_BU, 'IF': Data.scale_IF, 
+                               'MM': Data.scale_MM, 'EE': Data.scale_EE, 
+                               'AU': Data.scale_AU, 'OT': Data.scale_OT, 
+                               'MP': Data.scale_MP,},)
+    
+    hiber_list = pd.DataFrame({'BU': Data.hiber_BU, 'IF': Data.hiber_IF, 
+                               'MM': Data.hiber_MM, 'EE': Data.hiber_EE, 
+                               'AU': Data.hiber_AU, 'OT': Data.hiber_OT, 
+                               'MP': Data.hiber_MP,},)
+
+    pro_end = pd. DataFrame()
+    inflow = pd. DataFrame()
+    outflow = pd.DataFrame()
+    EOL = pd.DataFrame()
+    
+    for n in product_name:
+        
+        # domestic production of end-use goods
+        pro_end_list = compute_products(use_semi.long, use_semi.flat, use_semi.tube, use_semi.alloy, 
+                                        matrix_long[n], matrix_flat[n], matrix_tube[n], matrix_alloy[n])
+        pro_end[n] = pro_end_list
+        
+        # inflow
+        inflow_list = pro_end[n] - compute_export(pro_end[n], exp_share_end[n])
+        inflow[n] = inflow_list
+        
+        # outflow
+        outflow_list = compute_outflow(inflow[n], shape_list[n], scale_list[n])
+        outflow[n] = outflow_list
+        
+        # end-of-life scrap
+        EOL_list = outflow[n] * (1 - hiber_list[n])
+        EOL[n] = EOL_list
 
     # scrap inputs to EAF
-    EOL_sec= (EOL_BU + EOL_IF + EOL_MM + EOL_EE + EOL_AU + EOL_OT + EOL_MP) * Data.domestic_rec
-    fabrication_sec = fabrication_long + fabrication_flat + fabrication_tube + fabrication_alloy
+    EOL_sec= (EOL.BU + EOL.IF + EOL.MM + EOL.EE + EOL.AU + EOL.OT + EOL.MP) * Data.domestic_rec
+    fabrication_sec = fabrication.long + fabrication.flat + fabrication.tube + fabrication.alloy
     scrap_sec = (EOL_sec * Data.scrap_prep_eol + 
                  fabrication_sec *  Data.scrap_prep_fabrication + 
                  forming_sec * Data.scrap_prep_forming) * Data.sec_yield
 
     # CO2 emissions
     CO2 = (Data.Var_pri * Data.EI_pri) + (Data.Var_sec * Data.EI_sec) + (Data.Var_hyd * Data.EI_hyd)
-    
-    # inflow
-    in_matrix = pd.DataFrame({0:in_BU, 1:in_IF, 2:in_MM, 3:in_EE, 4:in_AU, 5:in_OT, 6:in_MP,},)
-
-    # outflow
-    ot_matrix = pd.DataFrame({0:ot_BU, 1:ot_IF, 2:ot_MM, 3:ot_EE, 4:ot_AU, 5:ot_OT, 6:ot_MP,},)
 
     # stock
-    NAS_matrix = in_matrix - ot_matrix
+    NAS_matrix = inflow - outflow
     st_matrix  = NAS_matrix.cumsum()
     st_sum     = st_matrix.sum(axis = 1)
 
@@ -185,72 +215,56 @@ def material_budget_model(sheet_name):
     forming_sec = compute_scrap(Data.Val_sec, export_sec, Data.forming_yield_sec)
     forming_hyd = compute_scrap(Data.Val_hyd, export_hyd, Data.forming_yield_pri)
     
-    # domestic production of finished steel
+    # domestic use of crude steel
     use_pri = compute_domestic_use(Data.Val_pri, export_pri, forming_pri)
     use_sec = compute_domestic_use(Data.Val_sec, export_sec, forming_sec)
     use_hyd = compute_domestic_use(Data.Val_hyd, export_hyd, forming_hyd)
     
-    pro_long = compute_semi(use_pri, use_sec, use_hyd, Data.share_long_pri, Data.share_long_sec)
-    pro_flat = compute_semi(use_pri, use_sec, use_hyd, Data.share_flat_pri, Data.share_flat_sec)
-    pro_tube = compute_semi(use_pri, use_sec, use_hyd, Data.share_tube_pri, Data.share_tube_sec)
-    pro_alloy = compute_semi(use_pri, use_sec, use_hyd, Data.share_alloy_pri, Data.share_alloy_sec)
+    pro_semi = pd.DataFrame()
+    exp_semi = pd.DataFrame()
+    fabrication = pd.DataFrame()
+    use_semi = pd.DataFrame()
     
-    # net-exports of finished steel
-    export_long = compute_export(pro_long, Data.share_export_long)
-    export_flat = compute_export(pro_flat, Data.share_export_flat)
-    export_tube = compute_export(pro_tube, Data.share_export_tube)
-    export_alloy = compute_export(pro_alloy, Data.share_export_alloy)
-    
-    # fabrication yield
-    fabrication_long = compute_scrap(pro_long, export_long, Data.fabrication_yield_long)
-    fabrication_flat = compute_scrap(pro_flat, export_flat, Data.fabrication_yield_flat)
-    fabrication_tube = compute_scrap(pro_tube, export_tube, Data.fabrication_yield_tube)
-    fabrication_alloy = compute_scrap(pro_alloy, export_alloy, Data.fabrication_yield_alloy)
-    
-    # domestic production of end-use goods
-    use_long = compute_domestic_use(pro_long, export_long, fabrication_long)
-    use_flat = compute_domestic_use(pro_flat, export_flat, fabrication_flat)
-    use_tube = compute_domestic_use(pro_tube, export_tube, fabrication_tube)
-    use_alloy = compute_domestic_use(pro_alloy, export_alloy, fabrication_alloy)
-    
-    pro_BU = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.BU, matrix_flat.BU, matrix_tube.BU, matrix_alloy.BU)
-    pro_IF = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.IF, matrix_flat.IF, matrix_tube.IF, matrix_alloy.IF)
-    pro_MM = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.MM, matrix_flat.MM, matrix_tube.MM, matrix_alloy.MM)
-    pro_EE = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.EE, matrix_flat.EE, matrix_tube.EE, matrix_alloy.EE)
-    pro_AU = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.AU, matrix_flat.AU, matrix_tube.AU, matrix_alloy.AU)
-    pro_OT = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.OT, matrix_flat.OT, matrix_tube.OT, matrix_alloy.OT)
-    pro_MP = compute_products(use_long, use_flat, use_tube, use_alloy, matrix_long.MP, matrix_flat.MP, matrix_tube.MP, matrix_alloy.MP)
-
-    # inflow
-    in_BU = pro_BU - compute_export(pro_BU, Data.share_export_BU)
-    in_IF = pro_IF - compute_export(pro_IF, Data.share_export_IF)
-    in_MM = pro_MM - compute_export(pro_MM, Data.share_export_MM)
-    in_EE = pro_EE - compute_export(pro_EE, Data.share_export_EE)
-    in_AU = pro_AU - compute_export(pro_AU, Data.share_export_AU)
-    in_OT = pro_OT - compute_export(pro_OT, Data.share_export_OT)
-    in_MP = pro_MP - compute_export(pro_MP, Data.share_export_MP)
-
-    # outflow
-    ot_BU = compute_outflow(in_BU, Data.shape_BU, Data.scale_BU)
-    ot_IF = compute_outflow(in_IF, Data.shape_IF, Data.scale_IF)
-    ot_MM = compute_outflow(in_MM, Data.shape_MM, Data.scale_MM)
-    ot_EE = compute_outflow(in_EE, Data.shape_EE, Data.scale_EE)
-    ot_AU = compute_outflow(in_AU, Data.shape_AU, Data.scale_AU)
-    ot_OT = compute_outflow(in_OT, Data.shape_OT, Data.scale_OT)
-    ot_MP = compute_outflow(in_MP, Data.shape_MP, Data.scale_MP)
+    for m in semi_name:
         
-    # end-of-life scrap
-    EOL_BU = ot_BU * (1 - Data.hiber_BU)
-    EOL_IF = ot_IF * (1 - Data.hiber_IF)
-    EOL_MM = ot_MM * (1 - Data.hiber_MM)
-    EOL_EE = ot_EE * (1 - Data.hiber_EE)
-    EOL_AU = ot_AU * (1 - Data.hiber_AU)
-    EOL_OT = ot_OT * (1 - Data.hiber_OT)
-    EOL_MP = ot_MP * (1 - Data.hiber_MP)
+        # domestic production of finished steel
+        pro_semi_list = compute_semi(use_pri, use_sec, use_hyd, share_pri[m], share_sec[m])
+        pro_semi[m] = pro_semi_list
+        
+        # net-exports of finished steel
+        exp_semi_list = compute_export(pro_semi[m], exp_share_semi[m])
+        exp_semi[m] = exp_semi_list
+        
+        # fabrication yield
+        fabrication_list = compute_scrap(pro_semi[m], exp_semi[m], fabrication_yield[m])
+        fabrication[m] = fabrication_list
+        
+        # domestic use of finished steel
+        use_semi_list = compute_domestic_use(pro_semi[m], exp_semi[m], fabrication[m])
+        use_semi[m] = use_semi_list
+        
+    for n in product_name:
+        
+        # domestic production of end-use goods
+        pro_end_list = compute_products(use_semi.long, use_semi.flat, use_semi.tube, use_semi.alloy, 
+                                        matrix_long[n], matrix_flat[n], matrix_tube[n], matrix_alloy[n])
+        pro_end[n] = pro_end_list
+        
+        # inflow
+        inflow_list = pro_end[n] - compute_export(pro_end[n], exp_share_end[n])
+        inflow[n] = inflow_list
+        
+        # outflow
+        outflow_list = compute_outflow(inflow[n], shape_list[n], scale_list[n])
+        outflow[n] = outflow_list
+        
+        # end-of-life scrap
+        EOL_list = outflow[n] * (1 - hiber_list[n])
+        EOL[n] = EOL_list
 
     # scrap inputs to EAF
-    EOL_sec= (EOL_BU + EOL_IF + EOL_MM + EOL_EE + EOL_AU + EOL_OT + EOL_MP) * Data.domestic_rec
-    fabrication_sec = fabrication_long + fabrication_flat + fabrication_tube + fabrication_alloy
+    EOL_sec= (EOL.BU + EOL.IF + EOL.MM + EOL.EE + EOL.AU + EOL.OT + EOL.MP) * Data.domestic_rec
+    fabrication_sec = fabrication.long + fabrication.flat + fabrication.tube + fabrication.alloy
     scrap_sec = (EOL_sec * Data.scrap_prep_eol + 
                  fabrication_sec *  Data.scrap_prep_fabrication + 
                  forming_sec * Data.scrap_prep_forming) * Data.sec_yield
@@ -272,37 +286,37 @@ def material_budget_model(sheet_name):
                         'Scrap-EAF': Data.Val_sec * Data.EI_sec},)
     
     # domestic production of finished steel
-    steel_matrix = pd.DataFrame({'Carbon steel (long)': pro_long,
-                                 'Carbon steel (flat)': pro_flat,
-                                 'Carbon steel (tube)': pro_tube,
-                                 'Alloy steel': pro_alloy,},)
+    steel_matrix = pd.DataFrame({'Carbon steel (long)': pro_semi.long,
+                                 'Carbon steel (flat)': pro_semi.flat,
+                                 'Carbon steel (tube)': pro_semi.tube,
+                                 'Alloy steel': pro_semi.alloy,},)
     
     # domestic production of end-use goods
-    goods_matrix = pd.DataFrame({'Buildings': pro_BU,
-                                 'Infrastructure': pro_IF,
-                                 'Mechanical machinery': pro_MM,
-                                 'Electrical equipment': pro_EE,
-                                 'Automobiles': pro_AU,
-                                 'Other transport': pro_OT,
-                                 'Metal products': pro_MP,},)
+    goods_matrix = pd.DataFrame({'Buildings': pro_end.BU,
+                                 'Infrastructure': pro_end.IF,
+                                 'Mechanical machinery': pro_end.MM,
+                                 'Electrical equipment': pro_end.EE,
+                                 'Automobiles': pro_end.AU,
+                                 'Other transport': pro_end.OT,
+                                 'Metal products': pro_end.MP,},)
     
     # inflow
-    in_matrix = pd.DataFrame({'Buildings': in_BU,
-                              'Infrastructure': in_IF,
-                              'Mechanical machinery':in_MM,
-                              'Electrical equipment':in_EE,
-                              'Automobiles': in_AU,
-                              'Other transport': in_OT,
-                              'Metal products': in_MP,},)
+    in_matrix = pd.DataFrame({'Buildings': inflow.BU,
+                              'Infrastructure': inflow.IF,
+                              'Mechanical machinery':inflow.MM,
+                              'Electrical equipment':inflow.EE,
+                              'Automobiles': inflow.AU,
+                              'Other transport': inflow.OT,
+                              'Metal products': inflow.MP,},)
 
     # outflow
-    ot_matrix = pd.DataFrame({'Buildings': ot_BU,
-                              'Infrastructure': ot_IF,
-                              'Mechanical machinery': ot_MM,
-                              'Electrical equipment': ot_EE,
-                              'Automobiles': ot_AU,
-                              'Other transport': ot_OT,
-                              'Metal products': ot_MP,},)
+    ot_matrix = pd.DataFrame({'Buildings': outflow.BU,
+                              'Infrastructure': outflow.IF,
+                              'Mechanical machinery': outflow.MM,
+                              'Electrical equipment': outflow.EE,
+                              'Automobiles': outflow.AU,
+                              'Other transport': outflow.OT,
+                              'Metal products': outflow.MP,},)
 
     # stock
     NAS_matrix = in_matrix - ot_matrix
