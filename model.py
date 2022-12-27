@@ -119,9 +119,9 @@ def material_budget_model(sheet_name):
     end_name = ['BU', 'IF', 'MM', 'EE', 'AU', 'OT', 'MP']
     
     exp_share_end = pd.DataFrame({'BU': Data.share_export_BU, 'IF': Data.share_export_IF, 
-                                'MM': Data.share_export_MM, 'EE': Data.share_export_EE, 
-                                'AU': Data.share_export_AU, 'OT': Data.share_export_OT, 
-                                'MP': Data.share_export_MP,},)
+                                  'MM': Data.share_export_MM, 'EE': Data.share_export_EE, 
+                                  'AU': Data.share_export_AU, 'OT': Data.share_export_OT, 
+                                  'MP': Data.share_export_MP,},)
     
     shape_list = pd.DataFrame({'BU': Data.shape_BU, 'IF': Data.shape_IF, 
                                'MM': Data.shape_MM, 'EE': Data.shape_EE, 
@@ -138,8 +138,8 @@ def material_budget_model(sheet_name):
                                'AU': Data.hiber_AU, 'OT': Data.hiber_OT, 
                                'MP': Data.hiber_MP,},)
 
-    pro_end = pd. DataFrame()
-    inflow = pd. DataFrame()
+    pro_end = pd.DataFrame()
+    inflow = pd.DataFrame()
     outflow = pd.DataFrame()
     EOL = pd.DataFrame()
     
@@ -202,7 +202,7 @@ def material_budget_model(sheet_name):
     Data['Val_hyd'] = Data.Var_hyd.apply(value)
 
 ########################################################################
-# calculations with optimized numbers
+# mass balancing with optimised crude steel production
 ########################################################################
 
     # net-exports of ingots and semis
@@ -242,7 +242,12 @@ def material_budget_model(sheet_name):
         # domestic use of finished steel
         use_semi_list = compute_domestic_use(pro_semi[m], exp_semi[m], fabrication[m])
         use_semi[m] = use_semi_list
-        
+ 
+    pro_end = pd.DataFrame()
+    inflow = pd.DataFrame()
+    outflow = pd.DataFrame()
+    EOL = pd.DataFrame()
+    
     for n in end_name:
         
         # domestic production of end-use goods
