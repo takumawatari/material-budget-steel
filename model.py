@@ -116,7 +116,7 @@ def material_budget_model(sheet_name):
         use_semi[m] = use_semi_list
     
     # data preparation for calculating end-use products flows
-    product_name = ['BU', 'IF', 'MM', 'EE', 'AU', 'OT', 'MP']
+    end_name = ['BU', 'IF', 'MM', 'EE', 'AU', 'OT', 'MP']
     
     exp_share_end = pd.DataFrame({'BU': Data.share_export_BU, 'IF': Data.share_export_IF, 
                                 'MM': Data.share_export_MM, 'EE': Data.share_export_EE, 
@@ -143,7 +143,7 @@ def material_budget_model(sheet_name):
     outflow = pd.DataFrame()
     EOL = pd.DataFrame()
     
-    for n in product_name:
+    for n in end_name:
         
         # domestic production of end-use goods
         pro_end_list = compute_products(use_semi.long, use_semi.flat, use_semi.tube, use_semi.alloy, 
@@ -243,7 +243,7 @@ def material_budget_model(sheet_name):
         use_semi_list = compute_domestic_use(pro_semi[m], exp_semi[m], fabrication[m])
         use_semi[m] = use_semi_list
         
-    for n in product_name:
+    for n in end_name:
         
         # domestic production of end-use goods
         pro_end_list = compute_products(use_semi.long, use_semi.flat, use_semi.tube, use_semi.alloy, 
