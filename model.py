@@ -115,7 +115,7 @@ def material_budget_model(sheet_name):
         use_semi_list = compute_domestic_use(pro_semi[m], exp_semi[m], fabrication[m])
         use_semi[m] = use_semi_list
     
-    # data preparation for calculating end-use products flows
+    # data preparation for calculating end-use goods flows
     end_name = ['BU', 'IF', 'MM', 'EE', 'AU', 'OT', 'MP']
     
     exp_share_end = pd.DataFrame({'BU': Data.share_export_BU, 'IF': Data.share_export_IF, 
