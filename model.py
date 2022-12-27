@@ -69,18 +69,18 @@ def material_budget_model(sheet_name):
     use_sec = compute_domestic_use(Data.Var_sec, export_sec, forming_sec)
     use_hyd = compute_domestic_use(Data.Var_hyd, export_hyd, forming_hyd)
     
-    # data preparation
+    # data preparation for calculating finished steel flows
     semi_name= ['long', 'flat', 'tube', 'alloy']
     
     share_pri = pd.DataFrame({'long': Data.share_long_pri,
-                             'flat': Data.share_flat_pri,
-                             'tube': Data.share_tube_pri,
-                             'alloy': Data.share_alloy_pri,},)
+                              'flat': Data.share_flat_pri,
+                              'tube': Data.share_tube_pri,
+                              'alloy': Data.share_alloy_pri,},)
     
     share_sec = pd.DataFrame({'long': Data.share_long_sec,
-                             'flat': Data.share_flat_sec,
-                             'tube': Data.share_tube_sec,
-                             'alloy': Data.share_alloy_sec,},)
+                              'flat': Data.share_flat_sec,
+                              'tube': Data.share_tube_sec,
+                              'alloy': Data.share_alloy_sec,},)
 
     exp_share_semi = pd.DataFrame({'long': Data.share_export_long,
                                    'flat': Data.share_export_flat,
@@ -115,7 +115,7 @@ def material_budget_model(sheet_name):
         use_semi_list = compute_domestic_use(pro_semi[m], exp_semi[m], fabrication[m])
         use_semi[m] = use_semi_list
     
-    # data preparation
+    # data preparation for calculating end-use products flows
     product_name = ['BU', 'IF', 'MM', 'EE', 'AU', 'OT', 'MP']
     
     exp_share_end = pd.DataFrame({'BU': Data.share_export_BU, 'IF': Data.share_export_IF, 
