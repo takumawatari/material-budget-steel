@@ -182,13 +182,13 @@ def material_budget_model(sheet_name):
     
     for t in Data.index:
         
-        # CO2 emission constraints
+        # CO2 emissions constraint
         model += CO2[t] <= Data.budget[t]
     
-        # scrap availability constraints
+        # scrap availability constraint
         model += Data.Var_sec[t] <= scrap_sec[t]
         
-        # H2-DRI/EAF capacity constraints
+        # H2-DRI/EAF capacity constraint
         model += Data.Var_hyd[t] <= Data.hyd_cap[t]
     
         # non-negative constraints
