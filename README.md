@@ -1,4 +1,4 @@
-# Material-budget-model-steel-Japan
+# Material budget model
 
 This repository contains system models and datasets to explore future steel flows consistent with a carbon budget.
 
