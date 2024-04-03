@@ -1,4 +1,4 @@
-# Steel flows in a zero-emission future
+# Material-budget-model-steel-Japan
 
 This repository contains system models and datasets to explore future steel flows consistent with a carbon budget.
 
